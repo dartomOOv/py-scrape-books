@@ -2,8 +2,8 @@ import scrapy
 from scrapy import Selector
 from scrapy.http import Response
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.devtools.v85.browser import close
 
 
 class BooksSpider(scrapy.Spider):
@@ -13,7 +13,7 @@ class BooksSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        self._driver = webdriver.Chrome()
+        self._driver = self.__set_chrome_driver()
         self._rating_table = {
             "Zero": 0,
             "One": 1,
@@ -23,8 +23,13 @@ class BooksSpider(scrapy.Spider):
             "Five": 5
         }
 
+    def __set_chrome_driver(self):
+        options = Options()
+        options.add_argument("--headless=new")
+        return webdriver.Chrome(options=options)
+
     def close(self, reason: str):
-        self._driver = close()
+        self._driver.quit()
 
     def parse(self, response: Response, **kwargs):
         for product in response.css(".product_pod"):
